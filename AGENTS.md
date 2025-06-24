@@ -28,6 +28,77 @@ GORM is a full-featured ORM library that supports:
 - Keep functions focused and single-purpose
 - Use proper error handling with descriptive error messages
 
+### Go Development Best Practices
+
+#### Code Organization
+- Organize code into logical packages with clear responsibilities
+- Keep package names short, lowercase, and descriptive
+- Avoid package names that conflict with standard library
+- Use internal packages for code that shouldn't be imported externally
+- Group related types and functions together in the same file
+
+#### Naming Conventions
+- Use camelCase for unexported names, PascalCase for exported names
+- Use descriptive names that explain the purpose, not the type
+- Prefer `userID` over `userId` for consistency with Go style
+- Use single-letter variables only for short scopes (loops, receivers)
+- Name interfaces with `-er` suffix when they describe behavior (e.g., `Reader`, `Writer`)
+
+#### Error Handling
+- Always handle errors explicitly; never ignore them
+- Return errors as the last return value
+- Use `errors.New()` or `fmt.Errorf()` for creating errors
+- Wrap errors with additional context using `fmt.Errorf("context: %w", err)`
+- Check for specific error types using `errors.Is()` and `errors.As()`
+- Don't use panic for normal error conditions
+
+#### Memory Management
+- Avoid unnecessary allocations in hot paths
+- Reuse slices and maps when possible with proper capacity
+- Use sync.Pool for expensive-to-allocate objects
+- Be mindful of goroutine leaks - ensure they can exit
+- Close resources (files, connections) using defer statements
+
+#### Concurrency Best Practices
+- Use channels to communicate between goroutines
+- Prefer `sync.Mutex` over channels for protecting shared state
+- Always use `context.Context` for cancellation and timeouts
+- Avoid sharing mutable state; prefer immutable data structures
+- Use `sync.WaitGroup` to wait for goroutines to complete
+- Handle goroutine lifecycle properly to prevent leaks
+
+#### Performance Optimization
+- Profile before optimizing; use `go test -bench` and `go tool pprof`
+- Prefer string builders (`strings.Builder`) over string concatenation
+- Use appropriate data structures (map vs slice based on access patterns)
+- Minimize interface{} usage in favor of type-safe alternatives
+- Cache expensive computations when appropriate
+- Use build constraints for platform-specific optimizations
+
+#### Testing Best Practices
+- Write table-driven tests for multiple test cases
+- Use meaningful test names that describe the scenario
+- Test both happy path and error conditions
+- Use testify/assert for cleaner test assertions
+- Mock external dependencies for unit tests
+- Use integration tests for end-to-end validation
+- Maintain test coverage above 80% for critical paths
+
+#### Code Quality
+- Run `go vet`, `golint`, and `golangci-lint` regularly
+- Use `go mod tidy` to keep dependencies clean
+- Write self-documenting code with clear variable names
+- Add package-level documentation for exported types and functions
+- Use `//go:generate` for code generation when appropriate
+- Keep functions under 50 lines when possible
+
+#### Dependency Management
+- Use Go modules (`go.mod`) for dependency management
+- Pin dependency versions for reproducible builds
+- Regularly update dependencies and check for security vulnerabilities
+- Minimize external dependencies; prefer standard library when possible
+- Use `replace` directives carefully and document why they're needed
+
 ### GORM-Specific Patterns
 
 #### DB Instance Usage
@@ -65,6 +136,36 @@ GORM is a full-featured ORM library that supports:
 - Test with different database backends
 - Include edge cases and error conditions
 - Maintain high test coverage
+
+### GORM-Specific Go Best Practices
+
+#### Model Design
+- Use proper struct tags for database mapping (`gorm:"column:name"`)
+- Implement `Tabler` interface for custom table names
+- Use embedded structs for common fields (ID, timestamps)
+- Define associations clearly with proper foreign key relationships
+- Use pointer types for nullable fields to distinguish zero values from null
+
+#### Database Operations
+- Always use transactions for multi-step operations
+- Use `db.Session(&gorm.Session{})` to create isolated sessions
+- Implement proper connection pooling configuration
+- Use prepared statements for repeated queries
+- Handle database-specific errors gracefully
+
+#### Query Optimization
+- Use `Select()` to limit columns when not all fields are needed
+- Implement proper pagination with `Limit()` and `Offset()`
+- Use `Preload()` judiciously to avoid N+1 query problems
+- Consider using `Joins()` instead of `Preload()` for better performance
+- Index frequently queried columns in your database schema
+
+#### Context and Cancellation
+- Always pass `context.Context` to database operations
+- Use `db.WithContext(ctx)` for request-scoped operations
+- Implement proper timeout handling for long-running queries
+- Respect context cancellation in custom callbacks
+- Use `context.WithTimeout()` for operations with time limits
 
 ## Architecture Patterns
 
